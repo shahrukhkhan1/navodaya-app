@@ -1,7 +1,8 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import type { ChatMessage } from '../types';
 import Message from './Message';
 import SendIcon from './icons/SendIcon';
+import MicIcon from './icons/MicIcon';
 
 interface ChatInterfaceProps {
   messages: ChatMessage[];
@@ -10,6 +11,14 @@ interface ChatInterfaceProps {
   onReset: () => void;
   isSolved: boolean;
   onRequestPracticeProblem: () => void;
+}
+
+// Add type definition for window.SpeechRecognition
+declare global {
+  interface Window {
+    SpeechRecognition: any;
+    webkitSpeechRecognition: any;
+  }
 }
 
 const TypingIndicator: React.FC = () => (
@@ -27,7 +36,9 @@ const TypingIndicator: React.FC = () => (
 
 const ChatInterface: React.FC<ChatInterfaceProps> = ({ messages, onSendMessage, isLoading, onReset, isSolved, onRequestPracticeProblem }) => {
   const [input, setInput] = useState('');
+  const [isListening, setIsListening] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const recognitionRef = useRef<any>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -44,6 +55,48 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ messages, onSendMessage, 
       setInput('');
     }
   };
+
+  const toggleListening = useCallback(() => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+      alert("आपका ब्राउज़र वॉइस इनपुट का समर्थन नहीं करता है। (Your browser does not support voice input.)");
+      return;
+    }
+
+    if (isListening) {
+      recognitionRef.current?.stop();
+      setIsListening(false);
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'hi-IN'; // Default to Hindi India, works well for Hinglish too
+    recognition.continuous = false;
+    recognition.interimResults = false;
+
+    recognition.onstart = () => {
+      setIsListening(true);
+    };
+
+    recognition.onresult = (event: any) => {
+      const transcript = event.results[0][0].transcript;
+      setInput((prev) => (prev ? prev + ' ' + transcript : transcript));
+      setIsListening(false);
+    };
+
+    recognition.onerror = (event: any) => {
+      console.error("Speech recognition error", event.error);
+      setIsListening(false);
+    };
+
+    recognition.onend = () => {
+      setIsListening(false);
+    };
+
+    recognitionRef.current = recognition;
+    recognition.start();
+  }, [isListening]);
   
   return (
     <div className="flex flex-col h-full bg-gray-800 rounded-lg shadow-xl overflow-hidden">
@@ -84,6 +137,19 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ messages, onSendMessage, 
             className="flex-1 bg-gray-700 border border-gray-600 rounded-lg py-2 px-4 text-white focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 disabled:opacity-50"
             aria-label="Chat input"
           />
+          <button
+            type="button"
+            onClick={toggleListening}
+            disabled={isLoading || isSolved}
+            className={`p-2 rounded-full transition-colors ${
+              isListening 
+                ? 'bg-red-500 text-white animate-pulse' 
+                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+            }`}
+            title="बोलकर टाइप करें (Speak to type)"
+          >
+            <MicIcon className="w-5 h-5" />
+          </button>
           <button
             type="submit"
             disabled={isLoading || !input.trim() || isSolved}
