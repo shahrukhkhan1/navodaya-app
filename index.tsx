@@ -4,7 +4,8 @@ import App from './App';
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js')
+    // Use relative path './sw.js' instead of absolute '/sw.js' to support subdirectories
+    navigator.serviceWorker.register('./sw.js')
       .then(registration => {
         console.log('ServiceWorker registration successful with scope: ', registration.scope);
       })

@@ -1,10 +1,11 @@
 const CACHE_NAME = 'navodaya-mitra-cache-v1';
 // Only cache the core app shell files. Other assets will be cached on demand by the fetch handler.
+// Paths updated to be relative (removed leading slash) to support hosting in subdirectories.
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/manifest.webmanifest',
-  '/icon.svg',
+  './',
+  'index.html',
+  'manifest.webmanifest',
+  'icon.svg',
 ];
 
 // Install the service worker and cache the app shell

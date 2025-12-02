@@ -2,11 +2,22 @@
 <html lang="hi">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" href="/icon.svg" />
+    <link rel="icon" href="icon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Navodaya Mitra - JNV Tutor</title>
-    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="manifest" href="manifest.webmanifest" />
     <meta name="theme-color" content="#06b6d4" />
+    <script>
+      // Polyfill for process.env to prevent ReferenceError in browser environments like GitHub Pages.
+      // If you are deploying manually, you may need to insert your key here or configure your build tool to replace process.env.API_KEY.
+      if (typeof process === 'undefined') {
+        window.process = {
+          env: {
+            API_KEY: '' 
+          }
+        };
+      }
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
   <script type="importmap">
 {
@@ -24,6 +35,6 @@
 </head>
   <body class="bg-gray-900 text-gray-100">
     <div id="root"></div>
-    <script type="module" src="/index.tsx"></script>
+    <script type="module" src="index.tsx"></script>
   </body>
 </html>
