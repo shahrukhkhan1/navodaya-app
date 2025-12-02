@@ -71,7 +71,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ messages, onSendMessage, 
     }
 
     const recognition = new SpeechRecognition();
-    recognition.lang = 'hi-IN'; // Default to Hindi India, works well for Hinglish too
+    recognition.lang = 'hi-IN'; // Default to Hindi India
     recognition.continuous = false;
     recognition.interimResults = false;
 
@@ -132,23 +132,33 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ messages, onSendMessage, 
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="एक प्रश्न पूछें या 'अगला' टाइप करें..."
+            placeholder={isListening ? "सुन रहा हूँ..." : "प्रश्न पूछें (लिखें या माइक दबाएं)..."}
             disabled={isLoading || isSolved}
-            className="flex-1 bg-gray-700 border border-gray-600 rounded-lg py-2 px-4 text-white focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 disabled:opacity-50"
+            className={`flex-1 border rounded-lg py-2 px-4 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 disabled:opacity-50 transition-colors ${
+              isListening 
+              ? 'bg-red-900/20 border-red-500 text-white placeholder-red-300' 
+              : 'bg-gray-700 border-gray-600 text-white'
+            }`}
             aria-label="Chat input"
           />
           <button
             type="button"
             onClick={toggleListening}
             disabled={isLoading || isSolved}
-            className={`p-2 rounded-full transition-colors ${
+            className={`p-2 rounded-full transition-all relative ${
               isListening 
-                ? 'bg-red-500 text-white animate-pulse' 
+                ? 'bg-red-500 text-white shadow-[0_0_15px_rgba(239,68,68,0.6)] animate-pulse' 
                 : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
             }`}
             title="बोलकर टाइप करें (Speak to type)"
           >
             <MicIcon className="w-5 h-5" />
+            {isListening && (
+              <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+              </span>
+            )}
           </button>
           <button
             type="submit"

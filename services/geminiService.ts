@@ -20,7 +20,7 @@ export const extractProblemFromImage = async (imageBase64: string, mimeType: str
             model: 'gemini-2.5-flash',
             contents: { parts: [imagePart, { text: "इस छवि में दिखाए गए प्रश्न को निकालें और उसे स्पष्ट रूप से सादे पाठ प्रारूप में प्रस्तुत करें, बिना किसी मार्कडाउन या विशेष स्वरूपण के।" }] },
         });
-        return response.text;
+        return response.text || "छवि से पाठ नहीं निकाला जा सका।";
     } catch (error) {
         console.error("Error extracting problem from image:", error);
         return "माफ़ कीजिए, मुझे चित्र में दिया गया प्रश्न समझ नहीं आया। कृपया कोई दूसरा प्रयास करें।";
@@ -54,16 +54,16 @@ export const startTutorChat = async (context: TutorConfigData, problem: string):
     const systemInstruction = createSystemInstruction(context, problem);
     
     chatSession = ai.chats.create({
-        model: 'gemini-2.5-pro',
+        model: 'gemini-3-pro-preview',
         config: {
             systemInstruction: systemInstruction,
-            thinkingConfig: { thinkingBudget: 32768 }
+            thinkingConfig: { thinkingBudget: 16384 } // Adjusted budget for performance/latency balance
         },
     });
 
     try {
         const response = await chatSession.sendMessage({ message: "Let's begin." });
-        return response.text;
+        return response.text || "नमस्ते! चलिए शुरू करते हैं।";
     } catch (error) {
         console.error("Error starting chat:", error);
         return "पहला कदम तैयार करने में कुछ समस्या हुई। कृपया प्रश्न को फिर से अपलोड करने का प्रयास करें।";
@@ -76,7 +76,7 @@ export const continueTutorChat = async (userMessage: string): Promise<string> =>
     }
     try {
         const response = await chatSession.sendMessage({ message: userMessage });
-        return response.text;
+        return response.text || "मुझे खेद है, मैं जवाब नहीं दे पाया।";
     } catch (error) {
         console.error("Error in chat session:", error);
         return "मुझे एक समस्या का सामना करना पड़ा। कृपया अपना संदेश फिर से भेजने का प्रयास करें।";
