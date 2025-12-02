@@ -1,0 +1,5 @@
+{
+  "name": "Navodaya Mitra - JNV Tutor",
+  "description": "An AI-powered tutor in simple Hindi for students preparing for Jawahar Navodaya Vidyalaya (JNV) entrance exams. Now installable as a PWA for offline access.",
+  "requestFramePermissions": []
+}
